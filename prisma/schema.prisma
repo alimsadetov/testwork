@@ -1,0 +1,33 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = []
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum PaymentAction {
+  credit
+  debit
+}
+
+model User {
+  id      Int              @id @default(autoincrement())
+  balance Decimal          @default(0) @db.Decimal(18, 2)
+  history PaymentHistory[]
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+}
+
+model PaymentHistory {
+  id        Int          @id @default(autoincrement())
+  userId    Int
+  action    PaymentAction
+  amount    Decimal      @db.Decimal(18, 2)
+  ts        DateTime     @default(now())
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, ts])
+}
